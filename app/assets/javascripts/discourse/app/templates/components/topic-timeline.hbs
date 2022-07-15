@@ -1,0 +1,52 @@
+<div class="timeline-container">
+  <DSection
+    @class={{concat "topic-timeline " this.class}}
+    @prevEvent={{@info.prevEvent}}
+    @loading={{@model.postStream.loading}}
+    @dockAt={{@dockAt}}
+    @dockBottom={{@dockBottom}}
+  >
+
+    <div class="timeline-controls">
+      {{#if (and (not @info.topicProgressExpanded) this.currentUser)}}
+        <TopicAdminMenuButton
+          @topic={{@model}}
+          @addKeyboardTargetClass={{true}}
+          @toggleMultiSelect={{@toggleMultiSelect}}
+          @showTopicSlowModeUpdate={{@showTopicSlowModeUpdate}}
+          @deleteTopic={{@deleteTopic}}
+          @recoverTopic={{@recoverTopic}}
+          @toggleClosed={{@toggleClosed}}
+          @toggleArchived={{@toggleArchived}}
+          @toggleVisibility={{@toggleVisibility}}
+          @showTopicTimerModal={{@showTopicTimerModal}}
+          @showFeatureTopic={{@showFeatureTopic}}
+          @showChangeTimestamp={{@showChangeTimestamp}}
+          @resetBumpDate={{@resetBumpDate}}
+          @convertToPublicTopic={{@convertToPublicTopic}}
+          @convertToPrivateMessage={{@convertToPrivateMessage}}
+        />
+      {{/if}}
+    </div>
+
+    <TopicTimeline::ScrollArea
+      @topic={{@model}}
+      @enteredIndex={{@enteredIndex}}
+      @jumpTop={{@jumpTop}}
+      @jumpBottom={{@jumpBottom}}
+      @jumpEnd={{@jumpEnd}}
+      @jumpToIndex={{@jumpToIndex}}
+      @fullscreen={{@fullscreen}}
+    />
+
+    <TopicTimeline::FooterControls
+      @currentUser={{this.currentUser}}
+      @fullscreen={{@fullscreen}}
+      @topic={{@model}}
+      @notificationLevel={{@model.details.notification_level}}
+      @replyToPost={{@replyToPost}}
+      @showSummary={{@showSummary}}
+      @jumpToPostPrompt={{@jumpToPostPrompt}}
+    />
+  </DSection>
+</div>
