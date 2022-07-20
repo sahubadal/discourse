@@ -9,7 +9,10 @@ import discourseLater from "discourse-common/lib/later";
 import { relativeAge } from "discourse/lib/formatter";
 import renderTags from "discourse/lib/render-tags";
 import renderTopicFeaturedLink from "discourse/lib/render-topic-featured-link";
+<<<<<<< HEAD
 import { hideUserTip } from "discourse/lib/user-tips";
+=======
+>>>>>>> 83fa09f7f2 (Restore original component / widget)
 
 const SCROLLER_HEIGHT = 50;
 const LAST_READ_HEIGHT = 20;
