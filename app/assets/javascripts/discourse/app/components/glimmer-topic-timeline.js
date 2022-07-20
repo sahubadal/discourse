@@ -3,9 +3,13 @@ import { tracked } from "@glimmer/tracking";
 import optionalService from "discourse/lib/optional-service";
 
 export default class GlimmerTopicTimeline extends GlimmerComponent {
+<<<<<<< HEAD:app/assets/javascripts/discourse/app/components/topic-timeline.js
   @tracked dockAt = null;
   @tracked dockBottom = null;
   @tracked enteredIndex = this.args.enteredIndex;
+=======
+  @tracked prevEvent;
+>>>>>>> 651cc6582f (Move glimmer components behind site setting):app/assets/javascripts/discourse/app/components/glimmer-topic-timeline.js
 
   mobileView = this.site.mobileView;
   adminTools = optionalService();

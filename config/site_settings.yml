@@ -2033,6 +2033,7 @@ developer:
     default: false
     client: true
     hidden: true
+<<<<<<< HEAD
   enable_new_user_profile_nav_groups:
     client: true
     type: group_list
@@ -2063,6 +2064,12 @@ sidebar:
     choices:
       - "default"
       - "unread_new"
+=======
+  enable_glimmer_topic_timeline:
+    default: false
+    client: true
+    hidden: true
+>>>>>>> 651cc6582f (Move glimmer components behind site setting)
 
 embedding:
   embed_by_username:
