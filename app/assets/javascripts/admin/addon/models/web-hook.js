@@ -65,7 +65,7 @@ export default RestModel.extend({
     const tagNames = this.tag_names;
 
     // Hack as {{group-selector}} accepts a comma-separated string as data source, but
-    // we use an array to populate the data source above.
+    // we use an array to populate the datasource above.
     const groupsFilter = this.groupsFilterInName;
     const groupNames =
       typeof groupsFilter === "string" ? groupsFilter.split(",") : groupsFilter;

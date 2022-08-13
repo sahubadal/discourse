@@ -22,6 +22,7 @@ module("Integration | Component | select-kit/tag-drop", function (hooks) {
 
   hooks.beforeEach(function () {
     this.set("subject", selectKit());
+
     this.site.set("top_tags", ["jeff", "neil", "arpit", "régis"]);
 
     pretender.get("/tags/filter/search", (params) => {
