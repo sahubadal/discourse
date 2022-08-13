@@ -178,7 +178,7 @@ export default function transformPost(
   }
 
   const showTopicMap =
-    _additionalAttributes.indexOf("topicMap") !== -1 ||
+    _additionalAttributes.includes("topicMap") ||
     showPMMap ||
     (post.post_number === 1 &&
       topic.archetype === "regular" &&
@@ -287,6 +287,10 @@ export default function transformPost(
       (currentUser.staff || !post.user_deleted);
     postAtts.canPermanentlyDelete =
       postAtts.isDeleted && post.can_permanently_delete;
+  }
+
+  if (post.user_status) {
+    postAtts.userStatus = post.user_status;
   }
 
   _additionalAttributes.forEach((a) => (postAtts[a] = post[a]));

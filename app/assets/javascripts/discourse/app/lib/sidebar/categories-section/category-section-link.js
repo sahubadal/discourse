@@ -34,10 +34,6 @@ export default class CategorySectionLink {
     return this.category.slug;
   }
 
-  get route() {
-    return "discovery.latestCategory";
-  }
-
   get model() {
     return `${Category.slugFor(this.category)}/${this.category.id}`;
   }
@@ -51,7 +47,9 @@ export default class CategorySectionLink {
   }
 
   get text() {
-    return htmlSafe(categoryBadgeHTML(this.category, { link: false }));
+    return htmlSafe(
+      categoryBadgeHTML(this.category, { link: false, categoryStyle: "bullet" })
+    );
   }
 
   get badgeText() {

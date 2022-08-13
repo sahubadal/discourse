@@ -27,7 +27,7 @@ const NavItem = EmberObject.extend({
     },
 
     set(value) {
-      this.set("_title", value);
+      return this.set("_title", value);
     },
   },
 
@@ -56,7 +56,7 @@ const NavItem = EmberObject.extend({
     },
 
     set(value) {
-      this.set("_displayName", value);
+      return this.set("_displayName", value);
     },
   },
 
@@ -244,7 +244,7 @@ NavItem.reopenClass({
         since: "2.6.0",
         dropFrom: "2.7.0",
       });
-      args.siteSettings = getOwner(this).lookup("site-settings:main");
+      args.siteSettings = getOwner(this).lookup("service:site-settings");
     }
     let items = args.siteSettings.top_menu.split("|");
 
@@ -262,8 +262,8 @@ NavItem.reopenClass({
         }
 
         if (
-          (category || !args.skipCategoriesNavItem) &&
-          i.name.indexOf("categor") === 0
+          (category || args.skipCategoriesNavItem) &&
+          i.name.startsWith("categor")
         ) {
           return false;
         }

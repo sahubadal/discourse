@@ -9,7 +9,7 @@ export default class TagSectionLink {
   @tracked totalNew = 0;
 
   constructor({ tag, topicTrackingState }) {
-    this.tag = tag;
+    this.tagName = tag.name;
     this.topicTrackingState = topicTrackingState;
     this.refreshCounts();
   }
@@ -17,34 +17,40 @@ export default class TagSectionLink {
   @bind
   refreshCounts() {
     this.totalUnread = this.topicTrackingState.countUnread({
-      tagId: this.tag,
+      tagId: this.tagName,
     });
 
     if (this.totalUnread === 0) {
       this.totalNew = this.topicTrackingState.countNew({
-        tagId: this.tag,
+        tagId: this.tagName,
       });
     }
   }
 
   get name() {
-    return this.tag;
+    return this.tagName;
   }
 
-  get model() {
-    return this.tag;
+  get models() {
+    return [this.tagName];
+  }
+
+  get route() {
+    if (this.totalUnread > 0) {
+      return "tag.showUnread";
+    } else if (this.totalNew > 0) {
+      return "tag.showNew";
+    } else {
+      return "tag.show";
+    }
   }
 
   get currentWhen() {
     return "tag.show tag.showNew tag.showUnread tag.showTop";
   }
 
-  get route() {
-    return "tag.show";
-  }
-
   get text() {
-    return this.tag;
+    return this.tagName;
   }
 
   get badgeText() {
@@ -56,16 +62,6 @@ export default class TagSectionLink {
       return I18n.t("sidebar.new_count", {
         count: this.totalNew,
       });
-    }
-  }
-
-  get route() {
-    if (this.totalUnread > 0) {
-      return "tag.showUnread";
-    } else if (this.totalNew > 0) {
-      return "tag.showNew";
-    } else {
-      return "tag.show";
     }
   }
 }

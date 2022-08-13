@@ -123,6 +123,7 @@ const Composer = RestModel.extend({
   noBump: false,
   draftSaving: false,
   draftForceSave: false,
+  showFullScreenExitPrompt: false,
 
   archetypes: reads("site.archetypes"),
 
@@ -302,7 +303,7 @@ const Composer = RestModel.extend({
     if (
       !categoryId &&
       categoryIds &&
-      (categoryIds.indexOf(this.site.uncategorized_category_id) !== -1 ||
+      (categoryIds.includes(this.site.uncategorized_category_id) ||
         !this.siteSettings.allow_uncategorized_topics)
     ) {
       return true;
@@ -310,7 +311,7 @@ const Composer = RestModel.extend({
     return (
       categoryIds === undefined ||
       !categoryIds.length ||
-      categoryIds.indexOf(categoryId) !== -1
+      categoryIds.includes(categoryId)
     );
   },
 
@@ -1208,11 +1209,6 @@ const Composer = RestModel.extend({
     } else {
       // Do not save when there is no reply
       if (isEmpty(this.reply)) {
-        return false;
-      }
-
-      // Do not save when the reply's length is too small
-      if (this.replyLength < this.minimumPostLength) {
         return false;
       }
     }

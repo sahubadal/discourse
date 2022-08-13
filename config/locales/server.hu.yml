@@ -1704,19 +1704,6 @@ hu:
         %{base_url}/u/activate-account/%{email_token}
 
         Ha a fenti link valamiért nem működne, másold ki és illeszd be a böngésződ címsorába!
-    suspicious_login:
-      text_body_template: |
-        Szia!
-
-        Észrevettünk egy bejelentkezést egy olyan eszközről vagy helyről, amelyet általában te nem használsz. Te voltál az?
-
-         - Hely: %{location} (%{client_ip})
-         - Böngésző: %{browser}
-         - Eszköz: %{device} - %{os}
-
-        Ha te voltál, nagyszerű! Nincsen további teendőd.
-
-        Ha nem te voltál, kérlek [nézd át a meglévő munkameneteidet](%{base_url}/my/preferences/account), és változtasd meg a jelszavad!
     post_approved:
       title: "A bejegyzésedet jóváhagytuk"
   page_forbidden:
@@ -2018,40 +2005,14 @@ hu:
       title: "Aktiváló e-mail újraküldése"
   wizard:
     step:
-      forum_title:
-        title: "Név"
-      introduction:
-        title: "Bemutatkozás"
-        fields:
-          welcome:
-            extra_description: "Ha nem vagy biztos benne, kihagyhatod ezt a lépést, és később szerkesztheted az üdvözlő témát."
       privacy:
-        title: "Hozzáférés"
-        description: "<p>A közösséged mindenki előtt nyitva áll, vagy tagság, meghívás vagy jóváhagyás korlátozza? Ha szeretnéd, beállíthatod először titkosra ezt, majd később átválthatsz a nyilvánosra is.</p>"
         fields:
-          privacy:
-            choices:
-              open:
-                label: "Nyilvános"
-              restricted:
-                label: "Privát"
-      contact:
-        title: "Kapcsolat"
-        fields:
-          contact_email:
-            label: "E-mail"
-            placeholder: "name@example.com"
-          contact_url:
-            label: "Weboldal"
-            placeholder: "https://www.example.com/contact-us"
-          site_contact:
-            label: "Automatikus üzenetek"
-      corporate:
-        title: "Szervezet"
-        fields:
-          company_name:
-            label: "Cégnév"
-            placeholder: "Példa szervezet"
+          login_required:
+            placeholder: "Privát"
+          must_approve_users:
+            placeholder: "Jóváhagyást igényel"
+      ready:
+        title: "A Discourse készen áll!"
       styling:
         fields:
           styling_preview:
@@ -2068,16 +2029,22 @@ hu:
                 label: "Kategóriák és legutóbbi témák"
               categories_and_top_topics:
                 label: "Kategóriák és legfelső témák"
-      logos:
-        title: "Logók"
+      branding:
         fields:
           logo:
             label: "Elsődleges logó"
-      icons:
-        title: "Ikonok"
-        fields:
           large_icon:
             label: "Nagy ikon"
+      corporate:
+        fields:
+          company_name:
+            label: "Cégnév"
+            placeholder: "Példa szervezet"
+          contact_url:
+            label: "Weboldal"
+            placeholder: "https://www.example.com/contact-us"
+          site_contact:
+            label: "Automatikus üzenetek"
       invites:
         title: "Stáb meghívása"
       finished:

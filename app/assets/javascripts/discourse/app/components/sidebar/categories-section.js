@@ -1,9 +1,17 @@
-import { cached } from "@glimmer/tracking";
+import I18n from "I18n";
 
-import GlimmerComponent from "discourse/components/glimmer";
+import { cached } from "@glimmer/tracking";
+import { inject as service } from "@ember/service";
+import { action } from "@ember/object";
+
+import Component from "@glimmer/component";
 import CategorySectionLink from "discourse/lib/sidebar/categories-section/category-section-link";
 
-export default class SidebarCategoriesSection extends GlimmerComponent {
+export default class SidebarCategoriesSection extends Component {
+  @service router;
+  @service topicTrackingState;
+  @service currentUser;
+
   constructor() {
     super(...arguments);
 
@@ -20,11 +28,32 @@ export default class SidebarCategoriesSection extends GlimmerComponent {
 
   @cached
   get sectionLinks() {
-    return this.site.trackedCategoriesList.map((trackedCategory) => {
-      return new CategorySectionLink({
-        category: trackedCategory,
-        topicTrackingState: this.topicTrackingState,
-      });
-    });
+    const links = [];
+
+    for (const category of this.currentUser.sidebarCategories) {
+      links.push(
+        new CategorySectionLink({
+          category,
+          topicTrackingState: this.topicTrackingState,
+        })
+      );
+    }
+
+    return links;
+  }
+
+  get noCategoriesText() {
+    const url = `/u/${this.currentUser.username}/preferences/sidebar`;
+
+    return `${I18n.t(
+      "sidebar.sections.categories.none"
+    )} <a href="${url}">${I18n.t(
+      "sidebar.sections.categories.click_to_get_started"
+    )}</a>`;
+  }
+
+  @action
+  editTracked() {
+    this.router.transitionTo("preferences.sidebar", this.currentUser);
   }
 }

@@ -10,10 +10,7 @@ import pretender, {
   pretenderHelpers,
   resetPretender,
 } from "discourse/tests/helpers/create-pretender";
-import {
-  currentSettings,
-  resetSettings,
-} from "discourse/tests/helpers/site-settings";
+import { resetSettings } from "discourse/tests/helpers/site-settings";
 import { setDefaultOwner } from "discourse-common/lib/get-owner";
 import { setApplication, setResolver } from "@ember/test-helpers";
 import { setupS3CDN, setupURL } from "discourse-common/lib/get-url";
@@ -31,12 +28,11 @@ import { buildResolver } from "discourse-common/resolver";
 import { createHelperContext } from "discourse-common/lib/helpers";
 import deprecated from "discourse-common/lib/deprecated";
 import { flushMap } from "discourse/services/store";
-import { registerObjects } from "discourse/pre-initializers/inject-discourse-objects";
 import sinon from "sinon";
-import { run } from "@ember/runloop";
-import { isLegacyEmber } from "discourse-common/config/environment";
 import { disableCloaking } from "discourse/widgets/post-stream";
 import { clearState as clearPresenceState } from "discourse/tests/helpers/presence-pretender";
+import { addModuleExcludeMatcher } from "ember-cli-test-loader/test-support/index";
+import SiteSettingService from "discourse/services/site-settings";
 
 const Plugin = $.fn.modal;
 const Modal = Plugin.Constructor;
@@ -65,15 +61,12 @@ function AcceptanceModal(option, _relatedTarget) {
   });
 }
 
-let app;
 let started = false;
 
 function createApplication(config, settings) {
-  if (app) {
-    run(app, "destroy");
-  }
+  const app = Application.create(config);
 
-  app = Application.create(config);
+  app.injectTestHelpers();
   setApplication(app);
   setResolver(buildResolver("discourse").create({ namespace: app }));
 
@@ -101,6 +94,8 @@ function createApplication(config, settings) {
       return container;
     });
 
+  SiteSettingService.create = () => settings;
+
   if (!started) {
     app.instanceInitializer({
       name: "test-helper",
@@ -112,22 +107,15 @@ function createApplication(config, settings) {
     started = true;
   }
 
-  app.SiteSettings = settings;
-  registerObjects(app);
   return app;
 }
 
 function setupToolbar() {
   // Most default toolbar items aren't useful for Discourse
   QUnit.config.urlConfig = QUnit.config.urlConfig.reject((c) =>
-    [
-      "noglobals",
-      "notrycatch",
-      "nolint",
-      "devmode",
-      "dockcontainer",
-      "nocontainer",
-    ].includes(c.id)
+    ["noglobals", "nolint", "devmode", "dockcontainer", "nocontainer"].includes(
+      c.id
+    )
   );
 
   QUnit.config.urlConfig.push({
@@ -184,14 +172,10 @@ function writeSummaryLine(message) {
   }
 }
 
-function setupTestsCommon(application, container, config) {
+export default function setupTests(config) {
   disableCloaking();
 
   QUnit.config.hidepassed = true;
-
-  application.rootElement = "#ember-testing";
-  application.setupForTesting();
-  application.injectTestHelpers();
 
   sinon.config = {
     injectIntoThis: false,
@@ -226,22 +210,19 @@ function setupTestsCommon(application, container, config) {
     },
   });
 
-  let server;
   let setupData;
   const setupDataElement = document.getElementById("data-discourse-setup");
   if (setupDataElement) {
     setupData = setupDataElement.dataset;
     setupDataElement.remove();
   }
+
   QUnit.testStart(function (ctx) {
     bootbox.$body = $("#ember-testing");
     let settings = resetSettings();
     resetThemeSettings();
 
-    if (config) {
-      // Ember CLI testing environment
-      app = createApplication(config, settings);
-    }
+    const app = createApplication(config, settings);
 
     const cdn = setupData ? setupData.cdn : null;
     const baseUri = setupData ? setupData.baseUri : "";
@@ -252,24 +233,23 @@ function setupTestsCommon(application, container, config) {
       setupS3CDN(null, null, { snapshot: true });
     }
 
-    server = pretender;
-    applyDefaultHandlers(server);
+    applyDefaultHandlers(pretender);
 
-    server.prepareBody = function (body) {
-      if (body && typeof body === "object") {
+    pretender.prepareBody = function (body) {
+      if (typeof body === "object") {
         return JSON.stringify(body);
       }
       return body;
     };
 
     if (QUnit.config.logAllRequests) {
-      server.handledRequest = function (verb, path) {
+      pretender.handledRequest = function (verb, path) {
         // eslint-disable-next-line no-console
         console.log("REQ: " + verb + " " + path);
       };
     }
 
-    server.unhandledRequest = function (verb, path) {
+    pretender.unhandledRequest = function (verb, path) {
       if (QUnit.config.logAllRequests) {
         // eslint-disable-next-line no-console
         console.log("REQ: " + verb + " " + path + " missing");
@@ -283,10 +263,10 @@ function setupTestsCommon(application, container, config) {
       throw new Error(error);
     };
 
-    server.checkPassthrough = (request) =>
+    pretender.checkPassthrough = (request) =>
       request.requestHeaders["Discourse-Script"];
 
-    applyPretender(ctx.module, server, pretenderHelpers());
+    applyPretender(ctx.module, pretender, pretenderHelpers());
 
     Session.resetCurrent();
     if (setupData) {
@@ -298,19 +278,11 @@ function setupTestsCommon(application, container, config) {
 
     createHelperContext({
       get siteSettings() {
-        if (isLegacyEmber() && container.isDestroyed) {
-          return settings;
-        } else {
-          return container.lookup("site-settings:main");
-        }
+        return app.__container__.lookup("service:site-settings");
       },
       capabilities: {},
       get site() {
-        if (isLegacyEmber() && container.isDestroyed) {
-          return Site.current();
-        } else {
-          return container.lookup("site:main") || Site.current();
-        }
+        return app.__container__.lookup("service:site") || Site.current();
       },
       registry: app.__registry__,
     });
@@ -321,9 +293,6 @@ function setupTestsCommon(application, container, config) {
     sinon.stub(ScrollingDOMMethods, "screenNotFull");
     sinon.stub(ScrollingDOMMethods, "bindOnScroll");
     sinon.stub(ScrollingDOMMethods, "unbindOnScroll");
-
-    // Unless we ever need to test this, let's leave it off.
-    $.fn.autocomplete = function () {};
   });
 
   QUnit.testDone(function () {
@@ -342,13 +311,14 @@ function setupTestsCommon(application, container, config) {
     let testing = document.getElementById("ember-testing");
     testing.removeAttribute("class");
     testing.removeAttribute("style");
-    let testContainer = document.getElementById("ember-testing-container");
+
+    const testContainer = document.getElementById("ember-testing-container");
     testContainer.scrollTop = 0;
+    testContainer.scrollLeft = 0;
 
     flushMap();
 
     MessageBus.unsubscribe("*");
-    server = null;
   });
 
   if (getUrlParameter("qunit_disable_auto_start") === "1") {
@@ -389,19 +359,7 @@ function setupTestsCommon(application, container, config) {
     return true;
   };
 
-  if (isLegacyEmber()) {
-    Object.keys(requirejs.entries).forEach(function (entry) {
-      if (shouldLoadModule(entry)) {
-        require(entry, null, null, true);
-      }
-    });
-  } else {
-    // Ember CLI
-    const emberCliTestLoader = require("ember-cli-test-loader/test-support/index");
-    emberCliTestLoader.addModuleExcludeMatcher(
-      (name) => !shouldLoadModule(name)
-    );
-  }
+  addModuleExcludeMatcher((name) => !shouldLoadModule(name));
 
   // forces 0 as duration for all jquery animations
   // eslint-disable-next-line no-undef
@@ -409,30 +367,6 @@ function setupTestsCommon(application, container, config) {
 
   setupToolbar();
   reportMemoryUsageAfterTests();
-  setApplication(application);
-  setDefaultOwner(application.__container__);
-  resetSite();
-}
-
-export function setupTestsLegacy(application) {
-  app = application;
-  setResolver(buildResolver("discourse").create({ namespace: app }));
-  setupTestsCommon(application, app.__container__);
-
-  app.instanceInitializer({
-    name: "test-helper",
-    initialize: testsInitialized,
-    teardown: testsTornDown,
-  });
-  app.SiteSettings = currentSettings();
-  app.start();
-}
-
-export default function setupTests(config) {
-  let settings = resetSettings();
-  app = createApplication(config, settings);
-  setupTestsCommon(app, app.__container__, config);
-  sinon.restore();
 }
 
 function getUrlParameter(name) {

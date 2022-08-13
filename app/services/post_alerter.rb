@@ -203,8 +203,8 @@ class PostAlerter
 
     warn_if_not_sidekiq
 
-    # Don't notify the OP
-    user_ids -= [post.user_id]
+    # Don't notify the OP and last editor
+    user_ids -= [post.user_id, post.last_editor_id]
     users = User.where(id: user_ids).includes(:do_not_disturb_timings)
 
     DiscourseEvent.trigger(:before_create_notifications_for_users, users, post)
@@ -393,18 +393,9 @@ class PostAlerter
     return if user.staged? && topic.category&.mailinglist_mirror?
 
     notifier_id = opts[:user_id] || post.user_id # xxxxx look at revision history
-
-    # apply muting here
-    return if notifier_id && MutedUser.where(user_id: user.id, muted_user_id: notifier_id)
-      .joins(:muted_user)
-      .where('NOT admin AND NOT moderator')
-      .exists?
-
-    # apply ignored here
-    return if notifier_id && IgnoredUser.where(user_id: user.id, ignored_user_id: notifier_id)
-      .joins(:ignored_user)
-      .where('NOT admin AND NOT moderator')
-      .exists?
+    return if notifier_id && UserCommScreener.new(
+      acting_user_id: notifier_id, target_user_ids: user.id
+    ).ignoring_or_muting_actor?(user.id)
 
     # skip if muted on the topic
     return if TopicUser.where(

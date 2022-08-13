@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-describe Upload do
+RSpec.describe Upload do
   let(:upload) { build(:upload) }
   let(:user_id) { 1 }
 
@@ -43,7 +43,7 @@ describe Upload do
     end
   end
 
-  context ".create_thumbnail!" do
+  describe ".create_thumbnail!" do
     it "does not create a thumbnail when disabled" do
       SiteSetting.create_thumbnails = false
       OptimizedImage.expects(:create_for).never
@@ -118,7 +118,7 @@ describe Upload do
     expect(created_upload.valid?).to eq(false)
   end
 
-  context ".extract_url" do
+  describe ".extract_url" do
     let(:url) { 'https://example.com/uploads/default/original/1X/d1c2d40ab994e8410c.png' }
 
     it 'should return the right part of url' do
@@ -126,7 +126,7 @@ describe Upload do
     end
   end
 
-  context ".get_from_url" do
+  describe ".get_from_url" do
     let(:sha1) { "10f73034616a796dfd70177dc54b6def44c4ba6f" }
     let(:upload) { Fabricate(:upload, sha1: sha1) }
 
@@ -258,7 +258,7 @@ describe Upload do
     end
   end
 
-  context ".get_from_urls" do
+  describe ".get_from_urls" do
     let(:upload) { Fabricate(:upload, sha1: "10f73034616a796dfd70177dc54b6def44c4ba6f") }
     let(:upload2) { Fabricate(:upload, sha1: "2a7081e615f9075befd87a9a6d273935c0262cd5") }
 
@@ -392,7 +392,7 @@ describe Upload do
       expect(upload.secure).to eq(false)
     end
 
-    context "local attachment" do
+    context "with local attachment" do
       before do
         SiteSetting.authorized_extensions = "pdf"
       end
@@ -428,7 +428,7 @@ describe Upload do
       expect(upload.secure).to eq(false)
     end
 
-    context "secure media enabled" do
+    context "with secure media enabled" do
       before do
         enable_secure_media
       end
@@ -520,9 +520,7 @@ describe Upload do
   describe '.extract_upload_ids' do
     let(:upload) { Fabricate(:upload) }
 
-    # This spec fails when upload has a sha1 of "035839d28676a96fda268562e6aa93c57b11113c".
-    # When the sha1 is converted to hex, the leading 0 is ignored so the base62 encoding will be 26 chars long.
-    skip 'works with short URLs' do
+    it 'works with short URLs' do
       ids = Upload.extract_upload_ids("This URL #{upload.short_url} is an upload")
       expect(ids).to contain_exactly(upload.id)
     end
@@ -532,10 +530,15 @@ describe Upload do
       expect(ids).to contain_exactly(upload.id)
     end
 
-    # This spec fails when upload has a sha1 of "035839d28676a96fda268562e6aa93c57b11113c".
-    # When the sha1 is converted to hex, the leading 0 is ignored so the base62 encoding will be 26 chars long.
-    skip 'works with Base62 hashes' do
+    it 'works with Base62 hashes' do
       ids = Upload.extract_upload_ids("This URL /#{Upload.base62_sha1(upload.sha1)} is an upload")
+      expect(ids).to contain_exactly(upload.id)
+    end
+
+    it 'works with shorter base62 hashes (when sha1 has leading 0s)' do
+      upload.update(sha1: "0000c513e1da04f7b4e99230851ea2aafeb8cc4e")
+      base62 = Upload.base62_sha1(upload.sha1).delete_prefix("0")
+      ids = Upload.extract_upload_ids("This URL /#{base62} is an upload")
       expect(ids).to contain_exactly(upload.id)
     end
   end
@@ -546,7 +549,7 @@ describe Upload do
     stub_upload(upload)
   end
 
-  context '.destroy' do
+  describe '.destroy' do
     it "can correctly clear information when destroying an upload" do
       upload = Fabricate(:upload)
       user = Fabricate(:user)
@@ -565,28 +568,7 @@ describe Upload do
     end
   end
 
-  context ".signed_url_from_secure_media_url" do
-    before do
-      # must be done so signed_url_for_path exists
-      enable_secure_media
-    end
-
-    it "correctly gives back a signed url from a path only" do
-      secure_url = "/secure-media-uploads/original/1X/c5a2c4ba0fa390f5aac5c2c1a12416791ebdd9e9.png"
-      signed_url = Upload.signed_url_from_secure_media_url(secure_url)
-      expect(signed_url).not_to include("secure-media-uploads")
-      expect(UrlHelper.s3_presigned_url?(signed_url)).to eq(true)
-    end
-
-    it "correctly gives back a signed url from a full url" do
-      secure_url = "http://localhost:3000/secure-media-uploads/original/1X/c5a2c4ba0fa390f5aac5c2c1a12416791ebdd9e9.png"
-      signed_url = Upload.signed_url_from_secure_media_url(secure_url)
-      expect(signed_url).not_to include(Discourse.base_url)
-      expect(UrlHelper.s3_presigned_url?(signed_url)).to eq(true)
-    end
-  end
-
-  context ".secure_media_url_from_upload_url" do
+  describe ".secure_media_url_from_upload_url" do
     before do
       # must be done so signed_url_for_path exists
       enable_secure_media
@@ -600,7 +582,7 @@ describe Upload do
     end
   end
 
-  context ".secure_media_url?" do
+  describe ".secure_media_url?" do
     it "works for a secure media url with or without schema + host" do
       url = "//localhost:3000/secure-media-uploads/original/2X/f/f62055931bb702c7fd8f552fb901f977e0289a18.png"
       expect(Upload.secure_media_url?(url)).to eq(true)
