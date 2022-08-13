@@ -357,7 +357,7 @@ const Post = RestModel.extend({
     let ownAction = User.current()?.id === userId;
     let ownLike = ownAction && eventType === "liked";
     let current_actions_summary = this.get("actions_summary");
-    let likeActionID = this.site.post_action_types.find(
+    let likeActionID = Site.currentProp("post_action_types").find(
       (a) => a.name_key === "like"
     ).id;
     const newActionObject = { id: likeActionID, count, acted: ownLike };

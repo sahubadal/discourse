@@ -14,6 +14,7 @@ import PreloadStore from "discourse/lib/preload-store";
 import { Promise } from "rsvp";
 import RestModel from "discourse/models/rest";
 import Singleton from "discourse/mixins/singleton";
+import Site from "discourse/models/site";
 import UserAction from "discourse/models/user-action";
 import UserActionStat from "discourse/models/user-action-stat";
 import UserBadge from "discourse/models/user-badge";
@@ -278,7 +279,10 @@ const User = RestModel.extend({
 
   @discourseComputed("trust_level")
   trustLevel(trustLevel) {
-    return this.site.trustLevels.findBy("id", parseInt(trustLevel, 10));
+    return Site.currentProp("trustLevels").findBy(
+      "id",
+      parseInt(trustLevel, 10)
+    );
   },
 
   isBasic: equal("trust_level", 0),
@@ -333,7 +337,7 @@ const User = RestModel.extend({
       return [];
     }
 
-    return Site.current().categoriesList.filter((category) => {
+    return Site.currentProp("categoriesList").filter((category) => {
       if (
         this.siteSettings.suppress_uncategorized_badge &&
         category.isUncategorizedCategory
