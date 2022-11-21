@@ -135,7 +135,7 @@ module("Unit | Utility | click-track", function (hooks) {
 
   skip("tracks external URLs when opening in another window", async function (assert) {
     assert.expect(3);
-    User.currentProp("external_links_in_new_tab", true);
+    User.currentProp("user_option.external_links_in_new_tab", true);
 
     const done = assert.async();
     pretender.post("/clicks/track", (request) => {
@@ -169,7 +169,7 @@ module("Unit | Utility | click-track", function (hooks) {
   });
 
   test("does not track clicks links in quotes", async function (assert) {
-    User.currentProp("external_links_in_new_tab", true);
+    User.currentProp("user_option.external_links_in_new_tab", true);
     assert.notOk(track(generateClickEventOn(".quote a:last-child")));
     assert.ok(window.open.calledWith("https://google.com/", "_blank"));
   });
@@ -183,7 +183,7 @@ module("Unit | Utility | click-track", function (hooks) {
   });
 
   test("removes the href and put it as a data attribute", async function (assert) {
-    User.currentProp("external_links_in_new_tab", true);
+    User.currentProp("user_option.external_links_in_new_tab", true);
 
     assert.notOk(track(generateClickEventOn("a")));
 
