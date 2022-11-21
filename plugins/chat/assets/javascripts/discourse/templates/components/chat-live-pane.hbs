@@ -27,7 +27,12 @@
 
 <ChatRetentionReminder @chatChannel={{this.chatChannel}} />
 
-<MentionWarnings @mentions={{this.mentions}} />
+<MentionWarnings
+  @unreachableGroupMentions={{this.unreachableGroupMentions}}
+  @overMembersLimitGroupMentions={{this.overMembersLimitGroupMentions}}
+  @tooManyMentions={{this.tooManyMentions}}
+  @mentionsCount={{this.mentionsCount}}
+/>
 
 <div class="chat-message-actions-mobile-anchor"></div>
 <div
@@ -108,7 +113,7 @@
         @onValueChange={{action "composerValueChanged"}}
         @fullPage={{this.fullPage}}
         @chatChannel={{this.chatChannel}}
-        @onMention={{this.updateMentions}}
+        @onMentionUpdates={{this.updateMentions}}
       />
     {{else}}
       <ChatChannelPreviewCard @channel={{this.chatChannel}} />
