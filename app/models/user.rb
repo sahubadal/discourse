@@ -1936,12 +1936,6 @@ class User < ActiveRecord::Base
       # Filters out categories that user does not have access to or do not exist anymore
       category_ids = Category.secured(self.guardian).where(id: default_category_ids).pluck(:id)
 
-      # Only include secured categories
-      #secured_category_ids = self.secure_category_ids
-
-      #categories_to_add = secured_category_ids - category_ids
-
-      # TODO: Handle deleting categories too
       category_ids.each do |category_id|
         records.push(
           linkable_type: 'Category',
