@@ -140,7 +140,6 @@ discourseModule("Unit | Utility | uploads", function () {
 
   test("shows error message when no extensions are authorized", function (assert) {
     this.siteSettings.authorized_extensions = "";
-    this.siteSettings.authorized_extensions_for_staff = "";
 
     sinon.stub(dialog, "alert");
     assert.notOk(
