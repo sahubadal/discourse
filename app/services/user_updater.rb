@@ -321,7 +321,7 @@ class UserUpdater
 
   def update_sidebar_section_links(linkable_type, new_linkable_ids)
     if new_linkable_ids.blank?
-      SidebarSectionLink.where(user: user, linkable_type: linkable_type).delete_all
+      delete_all_sidebar_section_links(linkable_type)
     else
       existing_linkable_ids = SidebarSectionLink.where(user: user, linkable_type: linkable_type).pluck(:linkable_id)
 
@@ -342,19 +342,13 @@ class UserUpdater
   end
 
   def update_sidebar_tag_section_links(tag_names)
-    if tag_names.blank?
-      delete_all_sidebar_section_links('Tag')
-    else
-      update_sidebar_section_links('Tag', Tag.where(name: tag_names).pluck(:id))
-    end
+    tag_ids = tag_names.blank? ? [] : Tag.where(name: tag_names).pluck(:id)
+    update_sidebar_section_links('Tag', tag_ids)
   end
 
   def update_sidebar_category_section_links(category_ids)
-    if category_ids.blank?
-      delete_all_sidebar_section_links('Category')
-    else
-      update_sidebar_section_links('Category', Category.secured(guardian).where(id: category_ids).pluck(:id))
-    end
+    category_ids = category_ids.blank? ? [] : Category.secured(guardian).where(id: category_ids).pluck(:id)
+    update_sidebar_section_links('Category', category_ids)
   end
 
   def update_user_status(status)
